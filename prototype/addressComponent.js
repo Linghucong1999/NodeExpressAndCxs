@@ -20,7 +20,7 @@ class AddressComponent extends BaseComponent {
     async guessPostion(req) {
         return new Promise(async (resolve, reject) => {
             let ip;
-            const defaultIp = ['183.6.127.179', '183.7.221.12', '122.234.134.158', '101.226.168.228', '180.164.56.112', '180.149.134.141'];
+            const defaultIp = ['183.6.127.179', '122.234.134.158', '101.226.168.228', '180.164.56.112','103.138.75.90','202.106.186.34','106.2.176.22','221.4.220.238'];
             const randomIndex = Math.floor(Math.random() * defaultIp.length)
             if (process.env.NODE_ENV == 'development') {
                 ip = defaultIp[randomIndex];
@@ -73,18 +73,17 @@ class AddressComponent extends BaseComponent {
     async searchPlace(keyword, cityName, type = 'search') {
         try {
             const resObj = await this.fetchDate('https://apis.map.qq.com/ws/place/v1/search', {
-                boundary: 'nearby(' + encodeURIComponent(cityName) + ',0)',
+                boundary: 'region(' + encodeURIComponent(cityName) + ',1)',
                 keyword: encodeURIComponent(keyword),
-                page_size: 10,
+                page_size: 20,
                 page_index: 1,
                 key: this.tencentkey
 
             })
-
             if (resObj.status == 0) {
                 return resObj;
             } else {
-                throw new Error('搜索位置信息失败');
+                throw new Error(resObj.message);
             }
         } catch (err) {
             throw new Error(err);

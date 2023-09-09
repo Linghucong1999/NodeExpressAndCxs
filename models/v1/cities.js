@@ -61,15 +61,15 @@ citySchema.statics.getCityById = function (id) {
     return new Promise(async (resolve, reject) => {
         try {
             const city = await this.findOne();
-            const result = Object.entries(city.data).find(item => item[0] !== 'hotCities');
-            if (result) {
-                const cityItem = result[1].find(item => Number(item.id) === id);
-                if (cityItem) {
-                    resolve(cityItem);
-                } else {
-                    resolve(null);
+            Object.entries(city.data).forEach(item => {
+                if (item[0] !== 'hotCities') {
+                    item[1].forEach(cityItem => {
+                        if (cityItem.id === id) {
+                            resolve(cityItem);
+                        }
+                    })
                 }
-            }
+            });
 
         } catch (err) {
             reject({
