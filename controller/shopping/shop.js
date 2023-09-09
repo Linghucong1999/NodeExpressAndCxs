@@ -20,11 +20,10 @@ class Shop extends AddressConpont {
         try {
             restaurant_id = await this.getId('restaurant_id');
         } catch (err) {
-            console.log('获取餐厅id失败');
             res.send({
                 status: 1,
                 type: 'ERROR_DATA',
-                message: '获取数据失败'
+                message: '获取餐厅ID失败'
             })
             return
         }
@@ -115,7 +114,7 @@ class Shop extends AddressConpont {
                         color: '57a9ff',
                         id: 1,
                         is_solid: true,
-                        text: '顺丰快运'
+                        text: '厨鲜生快达'
                     }
                 })
             }
