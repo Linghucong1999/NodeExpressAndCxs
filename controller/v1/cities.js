@@ -1,7 +1,5 @@
 const Cities = require('../../models/v1/cities');
-// const pinyin = require('pinyin');
 import pinyin from "pinyin";
-import { STYLE_NORMAL } from "pinyin";
 const AddressComponent = require('../../prototype/addressComponent');
 
 class CityHandle extends AddressComponent {
