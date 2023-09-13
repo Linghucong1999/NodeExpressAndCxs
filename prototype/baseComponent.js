@@ -4,7 +4,6 @@ const fs = require('fs');
 const Ids = require('../models/ids.js');
 const formidable = require('formidable');
 const qiniu = require('qiniu');
-const { fit } = require('sharp');
 const sharp = require('sharp');
 
 
@@ -215,6 +214,27 @@ class BaseComponent {
         })
     }
 
+
+    //删除图片
+    async deleteImg(req,res) {
+        const imgname = req.query.imgname;
+        const imgPath = "./public/img/" + imgname;
+        fs.unlink(imgPath, (err) => {
+            if (err) {
+                console.log(err);
+                res.send({
+                    status: 0,
+                    name: 'DELETE_IMG_ERROR',
+                    message: '删除图片失败'
+                })
+            } else {
+                res.send({
+                    status: 1,
+                    message: '删除图片成功',
+                })
+            }
+        })
+    }
 }
 
 
