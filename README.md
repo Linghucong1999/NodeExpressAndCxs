@@ -1,5 +1,5 @@
 - [vue3-elm-server](#vue3-elm-server)
-  - [文档后续项目写完会逐渐完善](#文档后续项目写完会逐渐完善)
+  - [关于public说明](#关于public说明)
   - [用户上传图片后端修改历程](#用户上传图片后端修改历程)
   - [用户上传图片处理中](#用户上传图片处理中)
   - [🍓关于开发用户API历程](#关于开发用户api历程)
@@ -11,8 +11,9 @@
 
 [厨生鲜后台管理系统](https://github.com/Linghucong1999/Vue3-CXSH)
 
-## 文档后续项目写完会逐渐完善
-每次 **commit** 我都会说明具体哪里改动，那里完善都会做详细的说明，所以目前只能先这样，开发时间太短，时间太赶了。
+## 关于public说明
+public目录下存在img目录，内部是存储图片数据，<b>然后public内还有一个tempImg目录，这个是图片上传的中转站</b>，需要自己创建，要不然图片上传会报错
+
 
 ## 用户上传图片后端修改历程
 最初版是使用  [gm](https://www.npmjs.com/package/gm),毕竟 gm 的处理图片人家也是专业的，本着这个原则，结果 &#x1F494; First download and install [GraphicsMagick](http://www.graphicsmagick.org/) or [ImageMagick](https://imagemagick.org/script/download.php)。
