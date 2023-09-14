@@ -53,7 +53,7 @@ Category.findOne().then((data) => {
             Category.create(categoryData[i]);
         }
     }
-}).catch(err=>{
+}).catch(err => {
     console.log(err);
 })
 
