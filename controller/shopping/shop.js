@@ -4,6 +4,7 @@ const Food = require('./food.js');
 const formidable = require('formidable');
 const CategoryHandle = require('./category.js');
 const Rating = require('../ugc/rating');
+const fs = require("fs");
 
 
 class Shop extends AddressConpont {
@@ -11,6 +12,7 @@ class Shop extends AddressConpont {
         super()
         this.addShop = this.addShop.bind(this);
         this.getRestaurants = this.getRestaurants.bind(this);
+        this.deleteResturant = this.deleteResturant.bind(this);
         // this.searchRestaurant = this.searchRestaurant.bind(this);
     }
 
@@ -119,7 +121,7 @@ class Shop extends AddressConpont {
         }
 
         // let activities = JSON.parse(form.activities);
-
+        //商家活动
         if (form.activities) {
             form.activities.forEach((item, index) => {
                 switch (item.icon_name) {
@@ -144,6 +146,7 @@ class Shop extends AddressConpont {
             })
         }
 
+        //商家外卖保险
         if (form.bao) {
             newShop.supports.push({
                 description: '已加入"外卖保"计划,食品安全有保障',
@@ -154,6 +157,7 @@ class Shop extends AddressConpont {
             })
         }
 
+        //是否承诺出餐准时
         if (form.zhun) {
             newShop.supports.push({
                 description: '准时到达,超时赔偿',
@@ -164,6 +168,7 @@ class Shop extends AddressConpont {
             })
         }
 
+        //商家是否支持开发票
         if (form.piao) {
             newShop.supports.push({
                 description: '该商家支持开据发票,请在下单前填写好发票抬头',
@@ -194,7 +199,7 @@ class Shop extends AddressConpont {
             })
         }
 
-        
+
 
     }
 
@@ -348,6 +353,98 @@ class Shop extends AddressConpont {
                 message: '获取店铺列表数据失败'
             })
         }
+    }
+
+    //获取餐馆详情
+    async getRestaurantDetail(req, res, next) {
+        const restaurant_id = req.params.restaurant_id;
+        if (!restaurant_id || !Number(restaurant_id)) {
+            res.send({
+                status: 0,
+                type: 'ERROR_PARAMS',
+                message: '餐馆ID参数错误',
+            })
+            return;
+        }
+
+        try {
+            const restaurant = await ShopModel.findOne({ id: restaurant_id }, { _id: 0 });
+            res.send(restaurant);
+        } catch (err) {
+            res.send({
+                status: 0,
+                type: 'GET_DATA_ERROR',
+                message: '获取餐馆详情失败',
+            })
+        }
+    }
+
+    //获取餐馆数量
+    async getShopCount(req, res, next) {
+        try {
+            const count = await ShopModel.count();
+            res.send({
+                status: 1,
+                count,
+            })
+        } catch (err) {
+            res.send({
+                status: 0,
+                type: 'ERROR_TO_GET_COUNT',
+                message: '获取餐馆数量失败',
+            })
+        }
+    }
+
+    //删除餐馆
+    async deleteResturant(req, res, next) {
+        const restaurant_id = req.params.restaurant_id;
+        if (!restaurant_id || !Number(restaurant_id)) {
+            res.send({
+                status: 0,
+                type: 'ERROR_PARAMS',
+                message: 'restaurant_id参数错误',
+            })
+            return;
+        }
+
+        try {
+            const booleImg = await this.deleteShopImage(restaurant_id);
+            const resShop = await ShopModel.deleteOne({ id: restaurant_id });
+            res.send({
+                status: 0,
+                message: '删除成功',
+            })
+        } catch (err) {
+            res.send({
+                status: 0,
+                type: 'DELETE_RESTURANT_FAILED',
+                message: '删除餐馆失败',
+            })
+        }
+
+    }
+
+    //删除场馆营业照等
+    async deleteShopImage(id) {
+        let result = await ShopModel.findOne({ id }, { _id: 0 });
+        const image_path = "./public/img/" + result.image_path;
+        const license_img_path = "./public/img/" + result.license.business_license_image;
+        const servise_img_path = "./public/img/" + result.license.catering_service_license_image;
+        const pathTotale = [image_path, license_img_path, servise_img_path];
+        const deletePromise = pathTotale.map(path => {
+            return new Promise((resolve, reject) => {
+                fs.unlink(path, (err) => {
+                    if (err) {
+                        resolve("看情况");
+                    } else {
+                        resolve(true);
+                    }
+                })
+            })
+        })
+        const promiseImgRes = await Promise.all(deletePromise);
+        return promiseImgRes;
     }
 }
 
