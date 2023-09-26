@@ -308,20 +308,20 @@ class Shop extends AddressConpont {
         for (const [indexList, itemList] of restaurants.entries()) {
             quernArr.push(itemList);
             if (count < maxCourrent && indexList === restaurants.length - 1) {
-                results = quernArr.map(async (item, index) => {
+                results = await Promise.all(quernArr.map(async (item, index) => {
                     const to = item.latitude + ',' + item.longitude;
                     const distance = await this.getDistance(from, to);
                     return distance;
-                })
-                position.push(results);
+                }))
+                position.push(...results);
                 quernArr = [];
             } else if (count % maxCourrent === 0) {
-                results = quernArr.map(async (item, index) => {
+                results = await Promise.all(quernArr.map(async (item, index) => {
                     const to = item.latitude + ',' + item.longitude;
                     const distance = await this.getDistance(from, to);
                     return distance;
-                })
-                position.push(results);
+                }))
+                position.push(...results);
                 quernArr = [];
                 count = 0;
                 await new Promise(resolve => setTimeout(resolve, 1000));
@@ -329,16 +329,17 @@ class Shop extends AddressConpont {
             }
             count++;
         }
-        let positionArr = await Promise.all(position.flat(Infinity));
+        // let positionArr = await Promise.all(position.flat(Infinity));
+        // console.log(position);
         try {
             if (restaurants.length) {
                 restaurants.map((item, index) => {
-                    return Object.assign(item, positionArr[index]);
+                    return Object.assign(item, position[index]);
                 })
             }
         } catch (err) {
             //腾讯地图日用量达到上限,需要优化解决
-            console.log("腾讯地图调用出问题" + err);
+            console.log("腾讯地图调用出问题,请及时处理" + err);
             restaurants.map((item, index) => {
                 return Object.assign(item, { distance: "5公里", order_lead_time: '40分钟' });
             })
@@ -355,7 +356,7 @@ class Shop extends AddressConpont {
         }
     }
 
-    //获取餐馆详情
+    //获取餐馆ID详情
     async getRestaurantDetail(req, res, next) {
         const restaurant_id = req.params.restaurant_id;
         if (!restaurant_id || !Number(restaurant_id)) {
@@ -412,7 +413,7 @@ class Shop extends AddressConpont {
             const booleImg = await this.deleteShopImage(restaurant_id);
             const resShop = await ShopModel.deleteOne({ id: restaurant_id });
             res.send({
-                status: 0,
+                status: 1,
                 message: '删除成功',
             })
         } catch (err) {
@@ -445,6 +446,104 @@ class Shop extends AddressConpont {
         })
         const promiseImgRes = await Promise.all(deletePromise);
         return promiseImgRes;
+    }
+
+    //更新店铺
+    async updatashop(req, res, next) {
+        let form = req.body;
+        if (JSON.stringify(form) === '{}') {
+            res.send({
+                status: 0,
+                type: 'ERROR_FORM',
+                message: '未修改表单'
+            })
+            return;
+        }
+
+        const { name, address, description = "", phone, category, id, latitude, longitude, image_path } = form;
+        try {
+            if (!name) {
+                throw new Error('餐馆名称错误');
+            } else if (!address) {
+                throw new Error('餐馆地址错误');
+            } else if (!phone) {
+                throw new Error('餐馆电话错误');
+            } else if (!category) {
+                throw new Error('餐馆分类错误');
+            } else if (!id || !Number(id)) {
+                throw new Error('餐馆ID错误');
+            } else if (!image_path) {
+                throw new Error('餐馆图片地址错误');
+            }
+
+            let newData;
+            if (latitude && longitude) {
+                newData = { name, address, description, phone, category, id, latitude, longitude, image_path }
+            } else {
+                newData = { name, address, description, phone, category, id, image_path };
+            }
+            await ShopModel.findOneAndUpdate({ id }, { $set: newData });
+            // console.log(newData);
+            res.send({
+                status: 1,
+                success: '修改商铺信息成功',
+            })
+        } catch (err) {
+            res.send({
+                status: 0,
+                type: 'ERROR_UPDATE_RESTAURANT',
+                message: '更新商铺信息失败',
+            })
+        }
+    }
+
+    //搜索店铺
+    async searchShop(req, res, next) {
+        const word = req.query.word;
+        try {
+            let resultShop = await ShopModel.find({ name: new RegExp(word) });
+            let shopname = [];
+            resultShop.forEach(item => {
+                let table = {
+                    name: item.name
+                }
+                shopname.push(table);
+            })
+            res.send({
+                status: 1,
+                shopname,
+            });
+        } catch (err) {
+            res.send({
+                status: 0,
+                message: '无此店铺'
+            })
+        }
+    }
+
+    //通过餐馆名称获取餐馆详情
+    async getRestaurantNameDetail(req, res, next) {
+        const shopName = req.query.name;
+        if (!shopName) {
+            res.send({
+                status: 0,
+                type: 'GET_ERROR_NAME',
+                message: '未携带店铺名称',
+            })
+            return;
+        }
+        try {
+            let restaurantNmae = await ShopModel.findOne({ name: shopName }, { _id: 0 });
+            res.send({
+                status: 1,
+                restaurantNmae,
+            })
+        } catch (err) {
+            res.send({
+                status:0,
+                message:'发生未知错误',
+            })
+        }
     }
 }
 

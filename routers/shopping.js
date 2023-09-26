@@ -7,9 +7,12 @@ const Check = require('../middlewares/check');
 const router = express.Router();
 
 router.post('/addshop', Check.checkAdmin, Shop.addShop);
+router.post('/updatashop',Check.checkAdmin,Shop.updatashop);
 router.get('/restaurants', Shop.getRestaurants);
 router.get('/restaurant/:restaurant_id', Shop.getRestaurantDetail);
 router.get('/restaurants/count', Shop.getShopCount);
+router.get('/restaurants/searchshop',Shop.searchShop);
+router.get('/restaurants/getrestaurantnamedetail',Shop.getRestaurantNameDetail);
 
 router.get('/getCategory/:restaurant_id', Food.getCategory);
 
