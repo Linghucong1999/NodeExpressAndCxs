@@ -38,6 +38,20 @@ app.use(session({
     store: store
 }))
 
+//成功日志
+app.use(expressWinston.logger({
+    transports: [
+        // new winston.transports.Console({
+        //     json: true,
+        //     colorize: true
+        // }),
+        new winston.transports.File({
+            filename: 'logs/success.log'
+        })
+    ]
+}))
+
+
 
 app.get('/', (req, res) => {
     res.send('欢迎来到厨鲜生');
@@ -45,7 +59,14 @@ app.get('/', (req, res) => {
 
 router(app);
 
-
+//错误的日志
+app.use(expressWinston.errorLogger({
+    transports:[
+        new winston.transports.File({
+            filename:'logs/error.log'
+        })
+    ]
+}))
 
 app.use(history())  //必须放在express.static中间件的前面引入
 app.use(express.static('./public'))

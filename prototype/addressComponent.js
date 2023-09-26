@@ -129,7 +129,7 @@ class AddressComponent extends BaseComponent {
                 }
             } catch (err) {
                 console.log('获取距离位置失败' + err);
-                throw new Error(err);
+                // throw new Error(err);
             }
         })
 
