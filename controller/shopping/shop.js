@@ -324,7 +324,7 @@ class Shop extends AddressConpont {
                 position.push(...results);
                 quernArr = [];
                 count = 0;
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                // await new Promise(resolve => setTimeout(resolve, 1000));
 
             }
             count++;
