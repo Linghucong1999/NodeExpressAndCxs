@@ -15,6 +15,8 @@ router.get('/restaurants/searchshop',Shop.searchShop);
 router.get('/restaurants/getrestaurantnamedetail',Shop.getRestaurantNameDetail);
 
 router.get('/getCategory/:restaurant_id', Food.getCategory);
+router.post('/addcategory',Check.checkAdmin,Food.addCategory);
+router.post('/addfood',Check.checkAdmin,Food.addFood);
 
 router.get('/v2/restaurant/category', Category.getCategories);
 
