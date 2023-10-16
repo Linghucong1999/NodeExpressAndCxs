@@ -129,37 +129,30 @@ const maxCourrent = 5;  //并发量最大次数限制
 let count = 0;
 let quernArr = [];
 let results;
-for (const [indexList, itemList] of restaurants.entries()) {
-    quernArr.push(itemList);
-    if (count % maxCourrent === 0) {
-        results = quernArr.map(async (item, index) => {
-            const to = item.latitude + ',' + item.longitude;
-            const distance = await this.getDistance(from, to);
-            return distance;
-        })
-        position.push(results);
-        quernArr = [];
-        count = 0;
-        await new Promise(resolve => setTimeout(resolve, 1000));    //需要等待一秒，因为后续有后续的数据进入
-    }else if (count < maxCourrent && indexList === restaurants.length - 1) {
-            results = quernArr.map(async (item, index) => {
-                const to = item.latitude + ',' + item.longitude;
-                const distance = await this.getDistance(from, to);
-                return distance;
-            })
-            position.push(results);
-            quernArr = [];
-    }
-    count++;
-}
-
-position.forEach(async (item, index) => {
-    Promise.all(position[index]).then(res => {
-                console.log(res);
-        }).catch(err => {
-                console.log(err);
-    })
-})
+ for (const [indexList, itemList] of restaurants.entries()) {
+                quernArr.push(itemList);
+                if (count < maxCourrent && indexList === restaurants.length - 1) {
+                    results = await Promise.all(quernArr.map(async (item, index) => {
+                        const to = item.latitude + ',' + item.longitude;
+                        const distance = await this.getDistance(from, to);
+                        return distance;
+                    }))
+                    position.push(...results);
+                    quernArr = [];
+                } else if (quernArr.length % maxCourrent === 0) {
+                    results = await Promise.all(quernArr.map(async (item, index) => {
+                        const to = item.latitude + ',' + item.longitude;
+                        const distance = await this.getDistance(from, to);
+                        return distance;
+                    }))
+                    position.push(...results);
+                    quernArr = [];
+                    count = 0;
+                    //添加延迟
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+                count++;
+            }
 ```
 ## &#x1F349; 对于为什么要在后端服务器做分页查询做解释说明&#x1F341;
 
