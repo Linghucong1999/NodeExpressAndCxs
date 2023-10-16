@@ -101,7 +101,7 @@ class AddressComponent extends BaseComponent {
                     to: to,
                     key: this.tencentkey
                 })
-                // console.log(res);
+                // console.log(res.result);
                 if (res.status === 0) {
                     let timevalue;
                     res.result.routes.forEach(item => {
@@ -129,7 +129,7 @@ class AddressComponent extends BaseComponent {
                 }
             } catch (err) {
                 console.log('获取距离位置失败' + err);
-                // throw new Error(err);
+                reject([]);
             }
         })
 

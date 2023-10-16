@@ -305,33 +305,32 @@ class Shop extends AddressConpont {
         let count = 0;
         let quernArr = [];
         let results;
-        for (const [indexList, itemList] of restaurants.entries()) {
-            quernArr.push(itemList);
-            if (count < maxCourrent && indexList === restaurants.length - 1) {
-                results = await Promise.all(quernArr.map(async (item, index) => {
-                    const to = item.latitude + ',' + item.longitude;
-                    const distance = await this.getDistance(from, to);
-                    return distance;
-                }))
-                position.push(...results);
-                quernArr = [];
-            } else if (count % maxCourrent === 0) {
-                results = await Promise.all(quernArr.map(async (item, index) => {
-                    const to = item.latitude + ',' + item.longitude;
-                    const distance = await this.getDistance(from, to);
-                    return distance;
-                }))
-                position.push(...results);
-                quernArr = [];
-                count = 0;
-                // await new Promise(resolve => setTimeout(resolve, 1000));
 
-            }
-            count++;
-        }
-        // let positionArr = await Promise.all(position.flat(Infinity));
-        // console.log(position);
         try {
+            for (const [indexList, itemList] of restaurants.entries()) {
+                quernArr.push(itemList);
+                if (count < maxCourrent && indexList === restaurants.length - 1) {
+                    results = await Promise.all(quernArr.map(async (item, index) => {
+                        const to = item.latitude + ',' + item.longitude;
+                        const distance = await this.getDistance(from, to);
+                        return distance;
+                    }))
+                    position.push(...results);
+                    quernArr = [];
+                } else if (quernArr.length % maxCourrent === 0) {
+                    results = await Promise.all(quernArr.map(async (item, index) => {
+                        const to = item.latitude + ',' + item.longitude;
+                        const distance = await this.getDistance(from, to);
+                        return distance;
+                    }))
+                    position.push(...results);
+                    quernArr = [];
+                    count = 0;
+                    //添加延迟
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+                count++;
+            }
             if (restaurants.length) {
                 restaurants.map((item, index) => {
                     return Object.assign(item, position[index]);
@@ -540,8 +539,8 @@ class Shop extends AddressConpont {
             })
         } catch (err) {
             res.send({
-                status:0,
-                message:'发生未知错误',
+                status: 0,
+                message: '发生未知错误',
             })
         }
     }
