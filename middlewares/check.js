@@ -28,7 +28,7 @@ class Check {
         next();
     }
 
-    async checkSuperAdmin() {
+    async checkSuperAdmin(req,res,next) {
         const admin_id = req.session.admin_id;
         if (!admin_id || !Number(admin_id)) {
             res.send({
