@@ -116,7 +116,7 @@ class Food extends BaseComponent {
         try {
             await newFood.save();
             const category = await MenuModel.find({ restaurant_id }, { _id: 0, __v: 0 });
-            
+
             res.send({
                 status: 1,
                 category: category,
@@ -325,6 +325,168 @@ class Food extends BaseComponent {
         }
 
         return [specifications, specfoods];
+    }
+
+    //搜索食品
+    async searchFood(req, res, next) {
+        const word = req.query.word;
+        try {
+            let resultFood = await FoodModel.find({ name: new RegExp(word) });
+            let foodname = [];
+            resultFood.forEach(item => {
+                let table = {
+                    name: item.name,
+                }
+                foodname.push(table)
+            })
+            res.send({
+                status: 1,
+                foodname,
+            })
+        } catch (err) {
+            res.send({
+                status: 0,
+                message: '搜索失败',
+            })
+        }
+    }
+
+    //查找特定食品
+    async getFoods(req, res, next) {
+        const { restaurant_id, limit = 20, offset = 0 } = req.query;
+        try {
+            let filter = {};
+            if (restaurant_id && Number(restaurant_id)) {
+                filter.restaurant_id = restaurant_id;
+            }
+
+            const foods = await FoodModel.find(filter, { _id: 0 }).sort({ item_id: -1 }).limit(Number(limit)).skip(Number(offset));
+            res.send(foods);
+        } catch (err) {
+            res.send({
+                status: 0,
+                type: 'GET_DATA_ERROR',
+                message: '获取食品数据失败',
+            })
+        }
+    }
+
+
+    //获取店铺食品数量
+    async getFoodsCount(req, res, next) {
+        const { restaurant_id } = req.query;
+        try {
+            let filter = {}
+            if (restaurant_id && Number(restaurant_id)) {
+                filter.restaurant_id = restaurant_id;
+            }
+
+            const count = await FoodModel.find(filter).count();
+            res.send({
+                status: 1,
+                count,
+            })
+        } catch (err) {
+            res.send({
+                status: 0,
+                type: 'GET_DATA_ERROR',
+                message: '获取食品数量失败',
+            })
+        }
+    }
+
+    //获取种类表单
+    async getMenuDetail(req, res, next) {
+        const category_id = req.params.category_id;
+        if (!category_id || !Number(category_id)) {
+            res.send({
+                status: 0,
+                type: 'PARAM_ERROR',
+                message: 'Menu ID参数错误',
+            });
+            return;
+        }
+
+        try {
+            const menu = await MenuModel.findOne({ id:category_id }, { _id: 0 });
+            res.send({
+                status: 1,
+                data: menu,
+            })
+        } catch (err) {
+            res.send({
+                status: 0,
+                type: 'GET_DATA_ERROR',
+                message: '获取Menu详情失败',
+            })
+        }
+    }
+
+    //获取菜单列表
+    async getMenu(req, res, next) {
+        const restaurant_id = req.query.restaurant_id;
+        const allMenu = req.query.allMenu;
+        if (!restaurant_id && !Number(restaurant_id)) {
+            res.send({
+                status: 0,
+                type: 'PARAM_ERROR',
+                message: 'restaurant_id参数错误'
+            })
+            return;
+        }
+
+        let filter = {};
+        if (allMenu) {
+            filter = { restaurant_id: restaurant_id };
+        } else {
+            filter = { restaurant_id, $where: function () { return this.foods.length } };
+        }
+
+        try {
+            const menu = await MenuModel.find(filter, { _id: 0 });
+            res.send({
+                status: 1,
+                menu,
+            })
+        } catch (err) {
+            res.send({
+                status: 0,
+                type: 'GET_DATA_ERROR',
+                message: '获取Menu列表失败',
+            })
+        }
+    }
+
+    //删除食品
+    async deleteFood(req, res, next) {
+        const food_id = req.params.food_id;
+        if (!food_id && !Number(food_id)) {
+            res.send({
+                status: 0,
+                type: 'PARAM_ERROR',
+                message: 'food_id参数错误'
+            })
+            return;
+        }
+
+        try {
+            const food = await FoodModel.findOne({ item_id: food_id });
+            const menu = await MenuModel.findOne({ id: food.category_id });
+            let subFood = menu.foods.id(food._id);
+            await subFood.remove();
+            await menu.save();
+            await food.remove();
+            res.send({
+                status: 1,
+                message: '删除食品成功'
+            })
+        } catch (err) {
+            res.send({
+                status: 0,
+                type: 'DELETE_DATA_ERROR',
+                message: '删除食品失败'
+            })
+        }
     }
 }
 
