@@ -82,12 +82,22 @@ citySchema.statics.getCityById = function (id) {
 
 const Cities = mongoose.model('Cities', citySchema);
 
-Cities.findOne().then((err, data) => {
-    if (!data) {
+// Cities.findOne().then((err, data) => {
+//     if (!data) {
+//         Cities.create({ data: cityData });
+//     } else {
+//         console.log(err);
+//     }
+// })
+
+Cities.countDocuments().then(count => {
+    if (count === 0) {
         Cities.create({ data: cityData });
     } else {
-        console.log(err);
+        console.log('城市集合已存在');
     }
+}).catch(err => {
+    console.log("城市集合存储失败", err);
 })
 
 module.exports = Cities;
