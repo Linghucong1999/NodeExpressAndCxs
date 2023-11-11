@@ -88,7 +88,15 @@ class BaseComponent {
         try {
             // const image_path = await this.qiniucon(req, type);  //上传到云服务器
             const image_path = await this.getPath(req, res);    //直接存到本地
-            res.send({ status: 1, image_path });
+            if (image_path.status === 0) {
+                res.send({
+                    status: 0,
+                    type: 'ERROR_EXTNAME',
+                    message: '文件格式错误'
+                })
+            } else {
+                res.send({ status: 1, image_path });
+            }
         } catch (err) {
             console.log('上传图片失败:' + err);
             res.send({
@@ -117,12 +125,17 @@ class BaseComponent {
                 const extname = path.extname(files.file.originalFilename);
                 if (!['.jpg', '.jpeg', '.png'].includes(extname)) {
                     fs.unlinkSync(files.file.filepath);
-                    res.send({
+                    // res.send({
+                    //     status: 0,
+                    //     type: 'ERROR_EXTNAME',
+                    //     message: '文件格式错误'
+                    // });
+                    resolve({
                         status: 0,
                         type: 'ERROR_EXTNAME',
                         message: '文件格式错误'
-                    });
-                    reject('上传失败');
+                    })
+                    // reject('上传失败');
                     return
                 }
 
@@ -216,7 +229,7 @@ class BaseComponent {
 
 
     //删除图片
-    async deleteImg(req,res) {
+    async deleteImg(req, res) {
         const imgname = req.query.imgname;
         const imgPath = "./public/img/" + imgname;
         fs.unlink(imgPath, (err) => {
