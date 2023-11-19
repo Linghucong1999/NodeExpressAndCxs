@@ -27,6 +27,7 @@ class Food extends BaseComponent {
         this.addCategory = this.addCategory.bind(this);
         this.addFood = this.addFood.bind(this);
         this.getSpecfood = this.getSpecfood.bind(this);
+        this.updataFood = this.updataFood.bind(this);
     }
 
     //每个餐馆都有一个初始化评论数据
@@ -323,7 +324,6 @@ class Food extends BaseComponent {
                 specifications[0].values.push(form.specs[i].specs);
             }
         }
-
         return [specifications, specfoods];
     }
 
@@ -408,7 +408,7 @@ class Food extends BaseComponent {
         }
 
         try {
-            const menu = await MenuModel.findOne({ id:category_id }, { _id: 0 });
+            const menu = await MenuModel.findOne({ id: category_id }, { _id: 0 });
             res.send({
                 status: 1,
                 data: menu,
@@ -487,6 +487,63 @@ class Food extends BaseComponent {
                 message: '删除食品失败'
             })
         }
+    }
+
+    //更新食品
+    async updataFood(req, res, next) {
+        const { name, item_id, description = "", image_path, category_id, new_category_id } = req.body;
+        try {
+            if (!name) {
+                throw new Error('食品名称错误');
+            } else if (!item_id || !Number(item_id)) {
+                throw new Error('食品ID错误');
+            } else if (!category_id || !Number(category_id)) {
+                throw new Error('食品分类ID错误');
+            } else if (!image_path) {
+                throw new Error('食品图片地址错误');
+            }
+
+            const [specifications,specfoods] = await this.getSpecfood(req.body, item_id);
+            let newData;
+            if (new_category_id !== category_id) {
+                newData = { name, description, image_path, category_id: new_category_id, specfoods, specifications };
+
+                const food = await FoodModel.findOneAndUpdate({ item_id }, { $set: newData });
+
+                const menu = await MenuModel.findOne({ id: category_id });
+
+                const targetmenu = await MenuModel.findOne({ id: new_category_id });
+
+                let subFood = menu.foods.id(food._id);
+                subFood.set(newData);
+                targetmenu.foods.push(subFood);
+                targetmenu.markModified('foods');
+                await targetmenu.save();
+                await subFood.remove();
+                await menu.save();
+            } else {
+                newData = { name, description, image_path, specfoods, specifications };
+                const food = await FoodModel.findOneAndUpdate({ item_id }, { $set: newData });
+                const menu = await MenuModel.findOne({ id: category_id });
+                let subFood = menu.foods.id(food._id);
+                subFood.set(newData);
+                await menu.save();
+
+            }
+
+            res.send({
+                status: 1,
+                success: '修改食品成功',
+            })
+        } catch (err) {
+            console.log('更新食品出错',err);
+            res.send({
+                status: 0,
+                type: 'ERROR_UPDATA_FOOD',
+                message: err,
+            })
+        }
+
     }
 }
 
