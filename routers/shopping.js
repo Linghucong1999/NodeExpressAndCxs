@@ -23,6 +23,7 @@ router.get('/v2/foods/count', Food.getFoodsCount);
 router.get('/v2/menu/:category_id', Food.getMenuDetail);
 router.get('/v2/menu', Food.getMenu);
 router.delete('/v2/food/:food_id', Check.checkSuperAdmin, Food.deleteFood);
+router.post('/v2/updatafood', Check.checkAdmin, Food.updataFood);
 
 router.get('/v2/restaurant/category', Category.getCategories);
 
