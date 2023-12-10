@@ -5,6 +5,7 @@ const v2 = require('./v2.js');
 const v1 = require('./v1.js');
 const eus = require('./eus.js');
 const findcity = require('./findcity');
+const bos = require('./bos.js');
 
 
 module.exports = app => {
@@ -15,4 +16,5 @@ module.exports = app => {
     app.use('/v1', v1);
     app.use('/eus', eus);
     app.use('/findcity', findcity);
+    app.use('/bos', bos);
 }
