@@ -114,6 +114,80 @@ class Order extends BaseComponent {
             })
         }
     }
+
+    async getOrderList(req, res, next) {
+        const { restaurant_id, limit = 20, offset = 0 } = req.query;
+        try {
+            let filter = {};
+            if (restaurant_id && Number(restaurant_id)) {
+                filter = { restaurant_id };
+            }
+            const orders = await OrderModel.find(filter).sort({ id: -1 }).limit(limit).skip(offset);
+            if (orders) {
+                const timeNow = new Date().getTime();
+
+                orders.map(item => {
+                    if (timeNow - item.order_time < 900000) {
+                        item.status_bar.title = "等待支付";
+                    } else {
+                        item.status_bar.title = "支付超时";
+                    }
+
+                    item.time_pass = Math.ceil((timeNow - item.order_time) / 1000);
+                    item.save();
+                    return item
+                })
+
+                res.send(orders);
+            } else {
+                res.send({
+                    status: 0,
+                    message: '此店铺暂无订单',
+                })
+            }
+        } catch (err) {
+            res.send({
+                status: 0,
+                type: 'GET_ORDER_DATA_ERROR',
+                message: '获取订单失败'
+            })
+        }
+    }
+
+    //根据相关关键词搜索相关订单  关键词为订单ID
+    async getOrderListBykeyWord(req, res, next) {
+        const { restaurant_id, keywords } = req.query;
+        if (!restaurant_id) {
+            res.send({
+                status: 0,
+                message: '请选择店铺',
+            })
+
+            return;
+        }
+
+        try {
+            const orderData = await OrderModel.findOne({ restaurant_id, id: keywords }).exec();
+            if (orderData) {
+                res.send({
+                    status: 1,
+                    orderData,
+                    message: '查询成功',
+                })
+            } else {
+                res.send({
+                    status: 0,
+                    message: '暂无此订单',
+                })
+            }
+        } catch (err) {
+            res.send({
+                status: 0,
+                message: '查询失败',
+            })
+        }
+
+    }
 }
 
 module.exports = new Order()
