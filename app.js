@@ -69,6 +69,7 @@ app.use(expressWinston.errorLogger({
 }))
 
 app.use(history())  //必须放在express.static中间件的前面引入
+console.log(chalk.red('history'))
 app.use(express.static('./public'))
 app.listen(config.port, () => {
     console.log(chalk.bold(`成功监听端口:http://127.0.0.1:${config.port}`))

@@ -8,7 +8,6 @@
     "dev": "cross-env NODE_ENV=development nodemon --watch . --ignore node_modules --exec babel-node index.js",
     "check": "cross-env NODE_ENV=production nodemon --harmony index.js",
     "start": "pm2 start ecosystem.config.js",
-    "reload":"pm2 reload ecosystem.config.js",
     "stop": "pm2 stop all",
     "monit": "pm2 monit",
     "plus": "pm2 plus"
