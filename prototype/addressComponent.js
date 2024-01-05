@@ -66,7 +66,7 @@ class AddressComponent extends BaseComponent {
                     cityInfo.city = cityInfo.city.replace(/市$/, '');
                     resolve(cityInfo);
                 } else {
-                    console.log("ip定位" + ip);
+                    console.log("ip定位", ip);
 
                     console.log('定位失败', result);
                     resolve(null);
