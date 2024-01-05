@@ -7,8 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "cross-env NODE_ENV=development nodemon --watch . --ignore node_modules --exec babel-node index.js",
     "check": "cross-env NODE_ENV=production nodemon --harmony index.js",
-    "start": "pm2 start index.js --name FreshGo --watch",
-    "stop": "pm2 stop FreshGo",
+    "start": "pm2 start ecosystem.config.js",
+    "stop": "pm2 stop all",
     "monit": "pm2 monit",
     "plus": "pm2 plus"
   },
