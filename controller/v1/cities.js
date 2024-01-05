@@ -1,5 +1,6 @@
 const Cities = require('../../models/v1/cities');
-import pinyin from "pinyin";
+// import pinyin from "pinyin";
+const pinyin =require('pinyin');
 const AddressComponent = require('../../prototype/addressComponent');
 
 class CityHandle extends AddressComponent {
@@ -46,7 +47,6 @@ class CityHandle extends AddressComponent {
             /**
              *  汉字转换成拼音
              */
-
             const pinyinArr = pinyin(cityInfo.city, { style: pinyin.STYLE_NORMAL });
             let cityName = '';
             pinyinArr.forEach(item => {

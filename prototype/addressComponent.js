@@ -34,7 +34,6 @@ class AddressComponent extends BaseComponent {
                 }
             }
 
-
             try {
                 let result = await this.fetchDate('https://apis.map.qq.com/ws/location/v1/ip', { ip, key: this.tencentkey });
 
