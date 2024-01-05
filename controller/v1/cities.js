@@ -47,6 +47,9 @@ class CityHandle extends AddressComponent {
             /**
              *  汉字转换成拼音
              */
+            if(cityInfo === null){
+                return 'beijing';
+            }
             const pinyinArr = pinyin(cityInfo.city, { style: pinyin.STYLE_NORMAL });
             let cityName = '';
             pinyinArr.forEach(item => {

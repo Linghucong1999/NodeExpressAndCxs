@@ -20,15 +20,23 @@ class AddressComponent extends BaseComponent {
     async guessPostion(req) {
         return new Promise(async (resolve, reject) => {
             let ip;
-            const defaultIp = ['183.6.127.179', '122.234.134.158', '101.226.168.228', '180.164.56.112','103.138.75.90','202.106.186.34','106.2.176.22','221.4.220.238'];
+            const defaultIp = ['183.6.127.179', '122.234.134.158', '101.226.168.228', '180.164.56.112', '103.138.75.90', '202.106.186.34', '106.2.176.22', '221.4.220.238'];
             const randomIndex = Math.floor(Math.random() * defaultIp.length)
             if (process.env.NODE_ENV == 'development') {
                 ip = defaultIp[randomIndex];
             } else {
                 try {
                     //如果客户端使用了代理服务器，那么 X-Forwarded-For 头部中会包含多个 IP 地址，其中第一个 IP 地址就是客户端的真实 IP 地址 ==>req.headers['x-forwarded-for']?.split(',')[0] 
-                    ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.connection.remoteAddress;
-                    ip = ip || defaultIp;
+                    // 如果存在 X-Forwarded-For 头部，并且包含多个 IP 地址，选择第一个 IP 地址作为客户端的真实 IP 地址
+                    const forwardedFor = req.headers['x-forwarded-for'];
+                    if (forwardedFor) {
+                        ip = forwardedFor.split(',')[0];
+                    } else {
+                        // 否则，使用 remoteAddress 获取客户端的 IP 地址
+                        ip = req.socket.remoteAddress || req.connection.remoteAddress;
+                    }
+                    // 如果无法获取到任何 IP 地址，使用默认的 IP 地址列表中的一个 IP
+                    ip = ip || defaultIp[randomIndex];
                 } catch (err) {
                     ip = defaultIp[randomIndex];
                 }
@@ -58,8 +66,10 @@ class AddressComponent extends BaseComponent {
                     cityInfo.city = cityInfo.city.replace(/市$/, '');
                     resolve(cityInfo);
                 } else {
+                    console.log("ip定位" + ip);
+
                     console.log('定位失败', result);
-                    reject('定位失败');
+                    resolve(null);
                 }
             } catch (err) {
                 reject(err);
