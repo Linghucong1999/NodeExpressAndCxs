@@ -1,6 +1,6 @@
 const Cities = require('../../models/v1/cities');
 // import pinyin from "pinyin";
-const pinyin =require('pinyin');
+const pinyin = require('pinyin');
 const AddressComponent = require('../../prototype/addressComponent');
 
 class CityHandle extends AddressComponent {
@@ -47,12 +47,13 @@ class CityHandle extends AddressComponent {
             /**
              *  汉字转换成拼音
              */
-            if(cityInfo === null){
+            if (cityInfo === '') {
                 return 'beijing';
             }
-            const pinyinArr = pinyin(cityInfo.city, { style: pinyin.STYLE_NORMAL });
+            const pinyinArr = pinyin.pinyin(cityInfo.city, { mode: pinyin.STYLE_NORMAL })
+            let cleanedPinyin=pinyinArr.map(subArray => subArray.map(p => p.normalize('NFD').replace(/[\u0300-\u036f]/g, '')));
             let cityName = '';
-            pinyinArr.forEach(item => {
+            cleanedPinyin.forEach(item => {
                 cityName += item[0];
             })
             return cityName;
@@ -102,7 +103,7 @@ class CityHandle extends AddressComponent {
         try {
             const geohash = req.params.geohash || '';
             if (geohash.indexOf(',') === -1) {
-                
+
             }
         } catch (err) {
 

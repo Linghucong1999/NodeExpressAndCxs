@@ -69,7 +69,7 @@ class AddressComponent extends BaseComponent {
                     console.log("ip定位", ip);
 
                     console.log('定位失败', result);
-                    resolve(null);
+                    resolve('');
                 }
             } catch (err) {
                 reject(err);
